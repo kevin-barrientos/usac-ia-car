@@ -49,6 +49,9 @@ public class Car {
     private int move_time;
     private int left_wheel_power;
     private int right_wheel_power;
+    
+    //Camara
+    private Camara mCamara;
 
     public Car() {
         mMode = MODE_MANUAL;
@@ -65,6 +68,8 @@ public class Car {
         SoftPwm.softPwmCreate(MOTOR1_PIN2, 0, 100);
         SoftPwm.softPwmCreate(MOTOR2_PIN1, 0, 100);
         SoftPwm.softPwmCreate(MOTOR2_PIN2, 0, 100);
+        
+        mCamara = new Camara();
     }
 
     /**
@@ -210,5 +215,16 @@ public class Car {
         }
         
         return false;
+    }
+    
+    public String sonar(){
+        String result = "Se pizo";
+        mCamara.tomarFoto();
+        try {
+            result = AnalizarImagen.analizarImagen();
+        } catch (Exception ex) {
+            Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return result;
     }
 }

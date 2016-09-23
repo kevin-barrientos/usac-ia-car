@@ -23,6 +23,7 @@ public class CommandInterpreter {
     public static final int COMMAND_TURN_RIGHT = 4;
     public static final int COMMAND_TURN_LEFT = 5;
     public static final int COMMAND_MOVE_BACK = 6;
+    public static final int COMMAND_TOMAR_FOTO = 7;
     
     private final Car mCar;
     
@@ -67,6 +68,9 @@ public class CommandInterpreter {
                 }else{
                     return buildCommandResponse(ERROR, COMMAND_MOVE_FORWARD, "Car is in automatic mode, change mode to manual.");
                 }
+            case COMMAND_TOMAR_FOTO:
+               String result = mCar.sonar();
+               return buildCommandResponse(SUCCESS, COMMAND_TOMAR_FOTO, result);
             default: 
                 return buildCommandResponse(ERROR_INVALID_COMMAND_CODE, commandCode, "Not a valid command.");
         }
@@ -74,7 +78,8 @@ public class CommandInterpreter {
     
     private String buildCommandResponse(int resultCode, int commandCode, String message){
         if(resultCode == 0){
-            return "{\"command\":" + commandCode + ", \"result_code\":" + resultCode + "}";
+            return "{\"command\":" + commandCode + ", \"result_code\":" + resultCode + 
+                    ", \"message\":\"" + message + "\"}";
         } else {
             if( message == null || message.equals("") )
                 message = "Unhandled error";
