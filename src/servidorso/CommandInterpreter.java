@@ -56,8 +56,8 @@ public class CommandInterpreter {
                 }
             case COMMAND_TURN_RIGHT:
                 if(mCar.getMode() == Car.MODE_MANUAL){
-                    mCar.turn(Car.RIGTH);
-                    return buildMoveResponse(Car.RIGTH);
+                    mCar.turn(Car.RIGHT);
+                    return buildMoveResponse(Car.RIGHT);
                 }else{
                     return buildCommandResponse(ERROR, COMMAND_MOVE_FORWARD, "Car is in automatic mode, change mode to manual.");
                 }
@@ -69,7 +69,7 @@ public class CommandInterpreter {
                     return buildCommandResponse(ERROR, COMMAND_MOVE_FORWARD, "Car is in automatic mode, change mode to manual.");
                 }
             case COMMAND_TOMAR_FOTO:
-               String result = mCar.sonar();
+               String result = mCar.sonar() ? "Se encontro una pared!!" : "Puedes avanzar :D";
                return buildCommandResponse(SUCCESS, COMMAND_TOMAR_FOTO, result);
             default: 
                 return buildCommandResponse(ERROR_INVALID_COMMAND_CODE, commandCode, "Not a valid command.");
@@ -96,16 +96,7 @@ public class CommandInterpreter {
         
         @Override
         public void run(){
-            while(mCar.getMode() == Car.MODE_AUTOMATIC){
-                try {
-                    //TODO execute algorithm Car.resolve();
-                    Thread.sleep(2000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(CommandInterpreter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                System.out.println("HOLI");
-            }
-            System.out.println("adios");
+            mCar.solveMaze();
         }
     }
 }

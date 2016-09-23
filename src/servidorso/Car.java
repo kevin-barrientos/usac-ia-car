@@ -17,7 +17,7 @@ public class Car {
 
     // possible moves
     public static final int FORWARD = 1;
-    public static final int RIGTH = 2;
+    public static final int RIGHT = 2;
     public static final int LEFT = 3;
     public static final int BACK = 4;
 
@@ -49,7 +49,7 @@ public class Car {
     private int move_time;
     private int left_wheel_power;
     private int right_wheel_power;
-    
+
     //Camara
     private Camara mCamara;
 
@@ -68,7 +68,7 @@ public class Car {
         SoftPwm.softPwmCreate(MOTOR1_PIN2, 0, 100);
         SoftPwm.softPwmCreate(MOTOR2_PIN1, 0, 100);
         SoftPwm.softPwmCreate(MOTOR2_PIN2, 0, 100);
-        
+
         mCamara = new Camara();
     }
 
@@ -79,7 +79,7 @@ public class Car {
      * {@link #NORTH} | {@link #WEST} | {@link #SOUTH} | {@link #EAST}
      */
     public void turn(int direction) {
-        if (direction == RIGTH) {
+        if (direction == RIGHT) {
             motorOn(LEFT_MOTOR, CLOCKWISE, left_wheel_power);
             motorOn(RIGTH_MOTOR, COUNTERCLOCKWISE, right_wheel_power);
             delay(right_turn_time);
@@ -210,15 +210,15 @@ public class Car {
             setLeftWheelPower(Integer.valueOf(settings[3]));
             setRightWheelPower(Integer.valueOf(settings[4]));
             setMoveTime(Integer.valueOf(settings[5]));
-            
+
             return true;
         }
-        
+
         return false;
     }
-    
-    public String sonar(){
-        String result = "Se pizo";
+
+    public boolean sonar() {
+        boolean result = false;
         mCamara.tomarFoto();
         try {
             result = AnalizarImagen.analizarImagen();
@@ -226,5 +226,29 @@ public class Car {
             Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
+    }
+
+    public void solveMaze() {
+        while (getMode() == Car.MODE_AUTOMATIC) {
+            turn(LEFT);
+            boolean paredIzquierda = sonar();
+            if (paredIzquierda == true) {
+                turn(RIGHT);
+                boolean paredFrontal = sonar();
+                if (paredFrontal == true) {
+                    turn(RIGHT);
+                    boolean paredDerecha = sonar();
+                    if (paredDerecha == true) {
+                        turn(RIGHT);
+                    }
+                }
+            }
+            move();
+        }
+        System.out.println("Automatic mode went off!! <------------------");
+    }
+
+    private void nextMove() {
+
     }
 }
