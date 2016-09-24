@@ -51,7 +51,7 @@ public class Car {
     private int right_wheel_power;
 
     //Camara
-    private Camara mCamara;
+    private final Camara mCamara;
 
     public Car() {
         mMode = MODE_MANUAL;
@@ -217,14 +217,19 @@ public class Car {
         return false;
     }
 
-    public boolean sonar() {
-        boolean result = false;
+    public Boolean sonar() {
+        Boolean result = null;
         mCamara.tomarFoto();
         try {
             result = AnalizarImagen.analizarImagen();
         } catch (Exception ex) {
             Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        if(result == null){
+            return sonar();
+        }
+        
         return result;
     }
 
@@ -243,7 +248,9 @@ public class Car {
                     }
                 }
             }
+            delay(1000);
             move();
+            delay(1000);
         }
         System.out.println("Automatic mode went off!! <------------------");
     }

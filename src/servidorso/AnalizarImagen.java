@@ -3,7 +3,6 @@ package servidorso;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,7 +15,7 @@ import javax.imageio.stream.ImageInputStream;
 public class AnalizarImagen {
 
     public static boolean analizarImagen() throws Exception {
-        File file = new File("/home/pi/NetBeansProjects/ServidorSo/imagen.jpg");
+        File file = new File("imagen.jpg");
         ImageInputStream is = ImageIO.createImageInputStream(file);
         Iterator iter = ImageIO.getImageReaders(is);
 
