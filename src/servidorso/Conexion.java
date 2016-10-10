@@ -51,6 +51,7 @@ public class Conexion extends Thread {
             // after every newline.
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            car.setOutputWriter(out);
 
             // Get messages from the client, line by line;
             while (true) {

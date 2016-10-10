@@ -6,6 +6,7 @@
 package servidorso;
 
 import com.pi4j.wiringpi.SoftPwm;
+import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,7 +18,7 @@ public class Car {
 
     // possible moves
     public static final int FORWARD = 1;
-    public static final int RIGTH = 2;
+    public static final int RIGHT = 2;
     public static final int LEFT = 3;
     public static final int BACK = 4;
 
@@ -50,6 +51,10 @@ public class Car {
     private int left_wheel_power;
     private int right_wheel_power;
 
+    //Camara
+    private final Camara mCamara;
+    private PrintWriter mOutSocketWriter;
+
     public Car() {
         mMode = MODE_MANUAL;
 
@@ -65,6 +70,8 @@ public class Car {
         SoftPwm.softPwmCreate(MOTOR1_PIN2, 0, 100);
         SoftPwm.softPwmCreate(MOTOR2_PIN1, 0, 100);
         SoftPwm.softPwmCreate(MOTOR2_PIN2, 0, 100);
+
+        mCamara = new Camara();
     }
 
     /**
@@ -74,7 +81,7 @@ public class Car {
      * {@link #NORTH} | {@link #WEST} | {@link #SOUTH} | {@link #EAST}
      */
     public void turn(int direction) {
-        if (direction == RIGTH) {
+        if (direction == RIGHT) {
             motorOn(LEFT_MOTOR, CLOCKWISE, left_wheel_power);
             motorOn(RIGTH_MOTOR, COUNTERCLOCKWISE, right_wheel_power);
             delay(right_turn_time);
@@ -205,10 +212,76 @@ public class Car {
             setLeftWheelPower(Integer.valueOf(settings[3]));
             setRightWheelPower(Integer.valueOf(settings[4]));
             setMoveTime(Integer.valueOf(settings[5]));
-            
+
             return true;
         }
-        
+
         return false;
+    }
+
+    public Boolean sonar(int veces) {
+        Boolean result = null;
+        int rojo = 0;
+        int noRojo = 0;
+        for (int i = 0; i < veces; i++) {
+            mCamara.tomarFoto();
+            try {
+                Thread.sleep(2000);
+                result = AnalizarImagen.analizarImagen();
+            } catch (Exception ex) {
+                Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            if (result == null) {
+                result = sonar(1);
+            }
+
+            if (result) {
+                rojo++;
+            } else {
+                noRojo++;
+            }
+
+        }
+        return rojo > noRojo;
+    }
+
+    public void solveMaze() {
+        int veces = 3;
+        while (getMode() == Car.MODE_AUTOMATIC) {
+            turn(LEFT);
+            sendMoveToSocket(LEFT);
+            boolean paredIzquierda = sonar(veces);
+            if (paredIzquierda == true) {
+                //TODO enviar pared
+                turn(RIGHT);
+                sendMoveToSocket(RIGHT);
+                boolean paredFrontal = sonar(veces);
+                if (paredFrontal == true) {
+                    //TODO enviar pared
+                    turn(RIGHT);
+                    sendMoveToSocket(RIGHT);
+                    boolean paredDerecha = sonar(veces);
+                    if (paredDerecha == true) {
+                        //TODO enviar pared
+                        turn(RIGHT);
+                        sendMoveToSocket(RIGHT);
+                    }
+                }
+            }
+            delay(1000);
+            move();
+            sendMoveToSocket(FORWARD);
+            delay(1000);
+        }
+        System.out.println("Automatic mode went off!! <------------------");
+    }
+
+    void setOutputWriter(PrintWriter out) {
+        mOutSocketWriter = out;
+    }
+
+    void sendMoveToSocket(int move) {
+        mOutSocketWriter.println("{\"action\":" + move + "}");
     }
 }

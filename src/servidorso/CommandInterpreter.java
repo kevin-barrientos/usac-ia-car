@@ -23,6 +23,7 @@ public class CommandInterpreter {
     public static final int COMMAND_TURN_RIGHT = 4;
     public static final int COMMAND_TURN_LEFT = 5;
     public static final int COMMAND_MOVE_BACK = 6;
+    public static final int COMMAND_TOMAR_FOTO = 7;
     
     private final Car mCar;
     
@@ -55,8 +56,8 @@ public class CommandInterpreter {
                 }
             case COMMAND_TURN_RIGHT:
                 if(mCar.getMode() == Car.MODE_MANUAL){
-                    mCar.turn(Car.RIGTH);
-                    return buildMoveResponse(Car.RIGTH);
+                    mCar.turn(Car.RIGHT);
+                    return buildMoveResponse(Car.RIGHT);
                 }else{
                     return buildCommandResponse(ERROR, COMMAND_MOVE_FORWARD, "Car is in automatic mode, change mode to manual.");
                 }
@@ -67,6 +68,9 @@ public class CommandInterpreter {
                 }else{
                     return buildCommandResponse(ERROR, COMMAND_MOVE_FORWARD, "Car is in automatic mode, change mode to manual.");
                 }
+            case COMMAND_TOMAR_FOTO:
+               String result = mCar.sonar(3) ? "Se encontro una pared!!" : "Puedes avanzar :D";
+               return buildCommandResponse(SUCCESS, COMMAND_TOMAR_FOTO, result);
             default: 
                 return buildCommandResponse(ERROR_INVALID_COMMAND_CODE, commandCode, "Not a valid command.");
         }
@@ -74,7 +78,8 @@ public class CommandInterpreter {
     
     private String buildCommandResponse(int resultCode, int commandCode, String message){
         if(resultCode == 0){
-            return "{\"command\":" + commandCode + ", \"result_code\":" + resultCode + "}";
+            return "{\"command\":" + commandCode + ", \"result_code\":" + resultCode + 
+                    ", \"message\":\"" + message + "\"}";
         } else {
             if( message == null || message.equals("") )
                 message = "Unhandled error";
@@ -91,16 +96,7 @@ public class CommandInterpreter {
         
         @Override
         public void run(){
-            while(mCar.getMode() == Car.MODE_AUTOMATIC){
-                try {
-                    //TODO execute algorithm Car.resolve();
-                    Thread.sleep(2000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(CommandInterpreter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                System.out.println("HOLI");
-            }
-            System.out.println("adios");
+            mCar.solveMaze();
         }
     }
 }
