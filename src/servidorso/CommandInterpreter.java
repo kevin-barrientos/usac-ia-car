@@ -69,7 +69,7 @@ public class CommandInterpreter {
                     return buildCommandResponse(ERROR, COMMAND_MOVE_FORWARD, "Car is in automatic mode, change mode to manual.");
                 }
             case COMMAND_TOMAR_FOTO:
-               String result = mCar.sonar() ? "Se encontro una pared!!" : "Puedes avanzar :D";
+               String result = mCar.sonar(3) ? "Se encontro una pared!!" : "Puedes avanzar :D";
                return buildCommandResponse(SUCCESS, COMMAND_TOMAR_FOTO, result);
             default: 
                 return buildCommandResponse(ERROR_INVALID_COMMAND_CODE, commandCode, "Not a valid command.");

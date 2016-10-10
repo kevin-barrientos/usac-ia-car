@@ -6,6 +6,7 @@
 package servidorso;
 
 import com.pi4j.wiringpi.SoftPwm;
+import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,6 +53,7 @@ public class Car {
 
     //Camara
     private final Camara mCamara;
+    private PrintWriter mOutSocketWriter;
 
     public Car() {
         mMode = MODE_MANUAL;
@@ -217,45 +219,69 @@ public class Car {
         return false;
     }
 
-    public Boolean sonar() {
+    public Boolean sonar(int veces) {
         Boolean result = null;
-        mCamara.tomarFoto();
-        try {
-            result = AnalizarImagen.analizarImagen();
-        } catch (Exception ex) {
-            Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
+        int rojo = 0;
+        int noRojo = 0;
+        for (int i = 0; i < veces; i++) {
+            mCamara.tomarFoto();
+            try {
+                Thread.sleep(2000);
+                result = AnalizarImagen.analizarImagen();
+            } catch (Exception ex) {
+                Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            if (result == null) {
+                result = sonar(1);
+            }
+
+            if (result) {
+                rojo++;
+            } else {
+                noRojo++;
+            }
+
         }
-        
-        if(result == null){
-            return sonar();
-        }
-        
-        return result;
+        return rojo > noRojo;
     }
 
     public void solveMaze() {
+        int veces = 3;
         while (getMode() == Car.MODE_AUTOMATIC) {
             turn(LEFT);
-            boolean paredIzquierda = sonar();
+            sendMoveToSocket(LEFT);
+            boolean paredIzquierda = sonar(veces);
             if (paredIzquierda == true) {
+                //TODO enviar pared
                 turn(RIGHT);
-                boolean paredFrontal = sonar();
+                sendMoveToSocket(RIGHT);
+                boolean paredFrontal = sonar(veces);
                 if (paredFrontal == true) {
+                    //TODO enviar pared
                     turn(RIGHT);
-                    boolean paredDerecha = sonar();
+                    sendMoveToSocket(RIGHT);
+                    boolean paredDerecha = sonar(veces);
                     if (paredDerecha == true) {
+                        //TODO enviar pared
                         turn(RIGHT);
+                        sendMoveToSocket(RIGHT);
                     }
                 }
             }
             delay(1000);
             move();
+            sendMoveToSocket(FORWARD);
             delay(1000);
         }
         System.out.println("Automatic mode went off!! <------------------");
     }
 
-    private void nextMove() {
+    void setOutputWriter(PrintWriter out) {
+        mOutSocketWriter = out;
+    }
 
+    void sendMoveToSocket(int move) {
+        mOutSocketWriter.println("{\"action\":" + move + "}");
     }
 }

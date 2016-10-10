@@ -30,12 +30,12 @@ public class AnalizarImagen {
 
         BufferedImage image = imageReader.read(0);
 
-        int height = image.getHeight() / 2;
-        int width = image.getWidth() / 2;
+        int height = image.getHeight();
+        int width = image.getWidth();
 
         Map m = new HashMap();
-        for (int i = 0; i < width; i = i + 20) {
-            for (int j = 0; j < height; j = j + 20) {
+        for (int i = width/6; i < width; i = i + 20) {
+            for (int j = height*4/5; j < height; j = j + 4) {
                 int rgb = image.getRGB(i, j);
                 int[] rgbArr = getRGBArr(rgb);
                 // Filter out grays....                
@@ -108,7 +108,7 @@ public class AnalizarImagen {
     }
     
     private static boolean isRed(int[] rgb){
-        if (rgb[0] >= 100 && rgb[0] > rgb[1] && rgb[0] > rgb[2]) {
+        if (rgb[0] > 100 && 100 > rgb[1] && 100 > rgb[2]) {
             System.out.println("Es rojo");
             return true;
         }
